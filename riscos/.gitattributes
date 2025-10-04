@@ -1,0 +1,5 @@
+**/c/* gitlab-language=c linguist-language=c
+**/h/* gitlab-language=c linguist-language=c
+*,fe1 gitlab-language=make linguist-language=makefile
+c/* gitlab-language=c linguist-language=c
+h/* gitlab-language=c linguist-language=c

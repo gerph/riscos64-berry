@@ -1,0 +1,91 @@
+#!/usr/bin/env riscos-amu -f
+# Makefile for Berry
+#
+
+VPATH = @ default
+
+#
+# Program specific options:
+#
+COMPONENT  = Berry
+
+# Specifies additional targets for startup
+#INITTARGET = inittarget
+
+# Specifies additional targets for clean
+#CLEANTARGET = cleantarget
+
+# aif, for linked objects
+# aof, for a partially linked AOF object
+# util, for utilities built with objasm
+# basic, for BASIC tools
+TYPE       = aif
+
+# The file to output (defaults ${COMPONENT})
+#TARGET = <filename>
+
+# Comma-separated list of paths to use for includes, such as:
+#	C:LibName.
+INCLUDES   = generate.,default.
+
+# Space separated list of defines to set, eg -DDEBUG
+CDEFINES   =
+
+# Space separated list of libraries to link against, eg C:LibName.o.libLibName
+LIBS       = ${CLIB}
+
+# Objects to build, using the format o.<name> (will be varied for build type)
+OBJS       = \
+             o.berry \
+             o.be_modtab \
+             o.be_port \
+             o.be_api \
+             o.be_baselib \
+             o.be_bytecode \
+             o.be_byteslib \
+             o.be_class \
+             o.be_code \
+             o.be_debug \
+             o.be_debuglib \
+             o.be_exec \
+             o.be_filelib \
+             o.be_func \
+             o.be_gc \
+             o.be_gclib \
+             o.be_globallib \
+             o.be_introspectlib \
+             o.be_jsonlib \
+             o.be_lexer \
+             o.be_libs \
+             o.be_list \
+             o.be_listlib \
+             o.be_map \
+             o.be_maplib \
+             o.be_mathlib \
+             o.be_mem \
+             o.be_module \
+             o.be_object \
+             o.be_oslib \
+             o.be_parser \
+             o.be_rangelib \
+             o.be_repl \
+             o.be_solidifylib \
+             o.be_strictlib \
+             o.be_string \
+             o.be_strlib \
+             o.be_syslib \
+             o.be_timelib \
+             o.be_undefinedlib \
+             o.be_var \
+             o.be_vector \
+             o.be_vm \
+
+# Space separated list of XML files for building documentation.
+#DOCSRC = <prm-in-xml-sources>
+
+
+include LibraryCommand
+
+
+#---------------------------------------------------------------------------
+# Dynamic dependencies:
