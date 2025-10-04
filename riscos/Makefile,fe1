@@ -36,9 +36,9 @@ LIBS       = ${CLIB}
 
 # Objects to build, using the format o.<name> (will be varied for build type)
 OBJS       = \
-             o.berry \
+             o.berry_riscos \
              o.be_modtab \
-             o.be_port \
+             o.be_port_riscos \
              o.be_api \
              o.be_baselib \
              o.be_bytecode \
