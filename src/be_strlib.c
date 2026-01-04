@@ -477,7 +477,11 @@ const char* be_splitpath(const char *path)
 {
     const char *p;
     for (p = path - 1; *path != '\0'; ++path) {
+#ifdef __riscos
+        if (*path == '.' || *path == ':') {
+#else
         if (*path == '/') {
+#endif
             p = path;
         }
     }
@@ -487,11 +491,19 @@ const char* be_splitpath(const char *path)
 const char* be_splitname(const char *path)
 {
     const char *p, *q, *end = path + strlen(path);
+#ifdef __riscos
+    for (p = end; *p != '/' && p > path; --p); /* skip [^\.] */
+    for (q = p; *q == '/' && q > path; --q); /* skip \. */
+    if ((q == path && *q == '/') || *q == '.') {
+        return end;
+    }
+#else
     for (p = end; *p != '.' && p > path; --p); /* skip [^\.] */
     for (q = p; *q == '.' && q > path; --q); /* skip \. */
     if ((q == path && *q == '.') || *q == '/') {
         return end;
     }
+#endif
     return p;
 }
 

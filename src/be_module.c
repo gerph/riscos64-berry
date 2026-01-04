@@ -152,7 +152,11 @@ static char* conpath(bvm *vm, bstring *path1, bstring *path2, size_t *size)
     *size = (size_t)len1 + (size_t)str_len(path2) + 1 + SUFFIX_LEN;
     buffer = be_malloc(vm, *size);
     strcpy(buffer, str(path1));
+#ifdef __riscos
+    buffer[len1] = '.';
+#else
     buffer[len1] = '/';
+#endif
     strcpy(buffer + len1 + 1, str(path2));
     return buffer;
 }
@@ -178,7 +182,11 @@ static int open_dllib(bvm *vm, char *path)
 static int open_libfile(bvm *vm, char *path, size_t size)
 {
     int res, idx = 0;
+#ifdef __riscos
+    const char *sfxs[] = { "", "/bec", "/be" };
+#else
     const char *sfxs[] = { "", ".bec", ".be" };
+#endif
     do {
         strcpy(path + size - SUFFIX_LEN, sfxs[idx]);
         res = open_script(vm, path);

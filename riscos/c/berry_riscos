@@ -27,7 +27,7 @@
     #define OS_NAME   "Darwin"
 #elif defined(_WIN32)
     #define OS_NAME   "Windows"
-#elif defined(_riscos)
+#elif defined(__riscos)
     #define OS_NAME   "RISC OS"
 #else
     #define OS_NAME   "Unknown OS"
@@ -61,10 +61,15 @@
 
 #if defined(_WIN32)
 #define PATH_SEPARATOR ";"
+#elif defined(__riscos)
+#define PATH_SEPARATOR ","
 #else
 #define PATH_SEPARATOR ":"
 #endif
 
+#define help_urls \
+    "  <https://github.com/berry-lang/berry>\n" \
+    "  <https://github.com/gerph/riscos64-berry>\n"
 
 /* command help information */
 #define help_information                                            \
@@ -81,7 +86,7 @@
     "  -v        show version information\n"                        \
     "  -h        show help information\n\n"                         \
     "For more information, please see:\n"                           \
-    "  <https://github.com/skiars/berry>.\n"
+    help_urls
 
 #define array_count(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -314,6 +319,10 @@ static void push_args(bvm *vm, int argc, char *argv[])
 #define BERRY_ROOT "\\Windows\\system32"
 static const char *module_paths[] = {
     BERRY_ROOT "\\berry\\packages",
+};
+#elif defined(__riscos)
+static const char *module_paths[] = {
+    "Berry:Packages", /* FIXME: Register Berry$Path */
 };
 #else
 #define BERRY_ROOT "/usr/local"
