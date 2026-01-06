@@ -51,7 +51,12 @@
 #if BE_DEBUG
 #define FULL_VERSION "Berry " BERRY_VERSION " (debug)"
 #else
+#ifdef __riscos
+#include "VersionNum"
+#define FULL_VERSION "Berry " BERRY_VERSION " (RISCOS: " Module_FullVersion ")"
+#else
 #define FULL_VERSION "Berry " BERRY_VERSION
+#endif
 #endif
 
 /* prompt message when REPL is loaded */

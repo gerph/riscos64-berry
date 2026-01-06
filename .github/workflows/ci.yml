@@ -1,0 +1,121 @@
+---
+# Build as 64-bit RISC OS
+#
+
+name: RISC OS
+
+# Controls when the action will run. Triggers the workflow on:
+#   * push on any branch.
+#   * tag creation for tags beginning with a 'v'
+on:
+  push:
+    branches: ["*"]
+    tags: ["v*"]
+  # Pull request events happen on pull request state transitions, so we probably don't want this here.
+  #pull_request:
+  #  branches: ["*"]
+
+jobs:
+  build-riscos64:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    container:
+      image: gerph/riscos-build:latest-64bit
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      leafname: ${{ steps.version.outputs.leafname }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - name: Native build tools for native build
+        run: |
+          sudo apt-get update && apt-get install -y build-essential libreadline-dev
+
+      # Build natively so that we have the stdlib files
+      - name: Build native version for headers
+        run: |
+          make
+
+      - name: RISC OS 64 build
+        run: |
+          cd riscos
+          riscos-amu BUILD64=1
+          cd aif64 ; riscos-zip ../../Berry.zip *,ff8
+
+      - name: Give the output a versioned name
+        id: version
+        run: |
+          if [ -f riscos/VersionNum ] ; then
+              version=$(sed '/MajorVersion / ! d ; s/.*MajorVersion *"\(.*\)"/\1/' riscos/VersionNum)
+          else
+              version=$(git rev-parse --short HEAD)
+          fi
+          echo "This is version: $version"
+          leafname="Berry-$version.zip"
+          mv Berry.zip "Berry-$version.zip"
+
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "leafname=$leafname" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RISCOS64-build
+          path: ${{ steps.version.outputs.leafname }}
+        # The artifact that is downloadable from the Actions is actually a zip of the artifacts
+        # that we supply. So it will be a regular Zip file containing a RISC OS Zip file.
+
+  test-riscos64:
+    runs-on: ubuntu-latest
+    container:
+      image: gerph/riscos-build:latest-64bit
+    needs:
+      - build-riscos64
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - name: Download built RISC OS binary
+        uses: actions/download-artifact@v4
+        with:
+          name: RISCOS64-build
+
+      - name: Decompress built binary
+        run: |
+          cd riscos
+          riscos-unzip ../"${{ needs.build-riscos64.outputs.leafname }}"
+
+      - name: Run on the build service
+        run: |
+          cd riscos
+          zip -r /tmp/source-archive.zip Berry,ff8 examples .robuild.yaml
+          riscos-build-online -A aarch64 -i /tmp/source-archive.zip -a off -t 60
+
+  # The release only triggers when the thing that was pushed was a tag starting with 'v'
+  release:
+    needs:
+      - build-riscos64
+      - test-riscos64
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download built RISC OS binary
+        uses: actions/download-artifact@v4
+        with:
+          name: RISCOS64-build
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          prerelease: false
+          draft: true
+          artifacts: "${{ needs.build-riscos64.outputs.leafname }}"
+          artifactContentType: application/zip
