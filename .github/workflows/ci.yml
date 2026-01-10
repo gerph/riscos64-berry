@@ -84,7 +84,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Download built RISC OS binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: RISCOS64-build
 
@@ -110,7 +110,7 @@ jobs:
       contents: write
     steps:
       - name: Download built RISC OS binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: RISCOS64-build
 
