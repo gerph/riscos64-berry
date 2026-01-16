@@ -96,7 +96,9 @@ jobs:
       - name: Run on the build service
         run: |
           cd riscos
+          echo "::group::Archive test files"
           zip -r /tmp/source-archive.zip Berry,ff8 examples filetest.be VersionNum .robuild.yaml
+          echo "::endgroup::"
           riscos-build-online -A aarch64 -i /tmp/source-archive.zip -a off -t 60
 
   # The release only triggers when the thing that was pushed was a tag starting with 'v'
