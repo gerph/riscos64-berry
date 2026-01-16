@@ -28,6 +28,7 @@ jobs:
       - echo *** Simple smoketest starts...
 
       - Berry examples.qsort/be
+      - Berry filetest/be
 
       - echo *** Simple smoketests complete
 

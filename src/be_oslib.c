@@ -68,12 +68,12 @@ static int m_listdir(bvm *vm)
     if (be_top(vm) >= 1 && be_isstring(vm, 1)) {
         res = be_dirfirst(&info, be_tostring(vm, 1));
     } else {
-        res = be_dirfirst(&info, ".");
+        res = be_dirfirst(&info, BE_DIRCURRENT);
     }
     be_newobject(vm, "list");
     while (res == 0) {
         const char *fn = info.name;
-        if (strcmp(fn, ".") && strcmp(fn, "..")) {
+        if (strcmp(fn, BE_DIRCURRENT) && strcmp(fn, BE_DIRPARENT)) {
             be_pushstring(vm, fn);
             be_data_push(vm, -2);
             be_pop(vm, 1);
@@ -147,9 +147,9 @@ static int m_path_split(bvm *vm)
         const char *path = be_tostring(vm, 1);
         const char *split = be_splitpath(path);
         size_t len = split - path;
-        if (split > path + 1 && split[-1] == '/') {
+        if (split > path + 1 && split[-1] == BE_DIRSEP) {
             const char *p = split - 1;
-            for (; p >= path && *p == '/'; --p);
+            for (; p >= path && *p == BE_DIRSEP; --p);
             if (p >= path) {
                 len = p - path + 1;
             }
@@ -202,13 +202,13 @@ static int m_path_join(bvm *vm)
     for (i = 1; i <= argc; ++i) {
         int l = be_strlen(vm, i);
         const char *s = be_tostring(vm, i);
-        if (s[0] == '/') {
+        if (s[0] == BE_DIRROOT) {
             p = buf;
         }
         strcpy(p, s);
         p += l;
-        if (l && s[l - 1] != '/' && i != argc) {
-            *p++ = '/';
+        if (l && s[l - 1] != BE_DIRSEP && i != argc) {
+            *p++ = BE_DIRSEP;
         }
     }
     be_pushnstring(vm, buf, p - buf);

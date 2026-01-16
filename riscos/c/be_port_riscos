@@ -303,7 +303,7 @@ int be_dirfirst(bdirinfo *info, const char *path)
     info->dir = NULL;
     if (buf && info->file) {
         struct _finddata_t *cfile = info->file;
-        strcat(strcpy(buf, path), "/*");
+        strcat(strcpy(buf, path), ".*");
         info->dir = (void *)_findfirst(buf, cfile);
         info->name = cfile->name;
         be_os_free(buf);

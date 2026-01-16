@@ -243,4 +243,31 @@
  **/
 #define be_assert(expr)                 assert(expr)
 
+/* Macro: BE_DIRROOT
+ * Specification of the root directory within the filesystem.
+ */
+/* Macro: BE_DIRSEP
+ * Specification of the directory separator within the filesystem.
+ */
+/* Macro: BE_EXTSEP
+ * Specification of the extension separator within the filesystem.
+ */
+/* Macro: BE_DIRPARENT
+ * Specification of the parent directory within the filesystem.
+ */
+#ifdef __riscos
+#define BE_DIRROOT      '$'
+#define BE_DIRSEP       '.'
+#define BE_EXTSEP       '/'
+#define BE_DIRPARENT    "^"
+#define BE_DIRCURRENT   "@"
+#else
+#define BE_DIRROOT      '/'
+#define BE_DIRSEP       '/'
+#define BE_EXTSEP       '.'
+#define BE_DIRPARENT    ".."
+#define BE_DIRCURRENT   "."
+#endif
+
+
 #endif
