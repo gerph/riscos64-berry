@@ -85,9 +85,15 @@ bbool be_global_undef(bvm *vm, bstring *name)
         int index = var_toidx(desc);
         var_setint(desc, -index - 2);   /* negate the index to mark it as undefined */
 
+#ifdef C89
+        {
+#endif
         bvalue* val = be_vector_at(&global(vm).vlist, index);
         var_setnil(val);
         return btrue;
+#ifdef C89
+        }
+#endif
     }
     return bfalse;
 }

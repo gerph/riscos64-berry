@@ -26,8 +26,21 @@
 
 #define NOT_METHOD          BE_NONE
 
+#ifdef C89
+#include "be_strlib.h"
+static void vm_error(bvm *vm, const char *except, const char *format, ...)
+{
+    const char* s;
+    va_list arg_ptr;
+    va_start(arg_ptr, format);
+    s = be_pushvfstr(vm, format, arg_ptr);
+    va_end(arg_ptr);
+    be_raise(vm, except, s);
+}
+#else
 #define vm_error(vm, except, ...) \
     be_raise(vm, except, be_pushfstring(vm, __VA_ARGS__))
+#endif
 
 #define RA()   (reg + IGET_RA(ins))  /* Get value of register A */
 #define RKB()  ((isKB(ins) ? ktab : reg) + KR2idx(IGET_RKB(ins)))  /* Get value of register or constant B */
@@ -605,6 +618,9 @@ newframe: /* a new call frame */
 #if BE_USE_PERF_COUNTERS
             vm->counter_get_global++;
 #endif
+#ifdef C89
+            {
+#endif
             bvalue *v = RA();
             bvalue *b = RKB();
             if (var_isstr(b)) {
@@ -619,6 +635,9 @@ newframe: /* a new call frame */
                 vm_error(vm, "internal_error", "global name must be a string");
             }
             dispatch();
+#ifdef C89
+            }
+#endif
         }
         opcase(SETNGBL): {  /* set Global by name */
             bvalue *v = RA();
@@ -918,6 +937,9 @@ newframe: /* a new call frame */
 #if BE_USE_PERF_COUNTERS
             vm->counter_get++;
 #endif
+#ifdef C89
+            {
+#endif
             bvalue result;  /* copy result to a temp variable because the stack may be relocated in virtual member calls */
             bvalue *b = RKB(), *c = RKC();
             if (var_isinstance(b) && var_isstr(c)) {
@@ -933,13 +955,25 @@ newframe: /* a new call frame */
                 attribute_error(vm, "attribute", b, c);
                 result = *RA();     /* avoid gcc warning for uninitialized variable result, this code is never reached */
             }
+#ifdef C89
+            {
+#endif
             bvalue *a = RA();
             *a = result;    /* assign the resul to the specified register on the updated stack */
             dispatch();
+#ifdef C89
+            }
+#endif
+#ifdef C89
+            }
+#endif
         }
         opcase(GETMET): {
 #if BE_USE_PERF_COUNTERS
             vm->counter_get++;
+#endif
+#ifdef C89
+            {
 #endif
             bvalue result;  /* copy result to a temp variable because the stack may be relocated in virtual member calls */
             bvalue *b = RKB(), *c = RKC();
@@ -947,6 +981,9 @@ newframe: /* a new call frame */
                 binstance *obj = var_toobj(b);
                 int type = obj_attribute(vm, b, var_tostr(c), &result);
                 reg = vm->reg;
+#ifdef C89
+                {
+#endif
                 bvalue *a = RA();
                 *a = result;
                 if (var_basetype(a) == BE_FUNCTION) {
@@ -972,26 +1009,47 @@ newframe: /* a new call frame */
                         "class '%s' has no method '%s'",
                         str(be_instance_name(obj)), str(var_tostr(c)));
                 }
+#ifdef C89
+                }
+#endif
             } else if (var_isclass(b) && var_isstr(c)) {
                 class_attribute(vm, b, c, &result);
                 reg = vm->reg;
+#ifdef C89
+                {
+#endif
                 bvalue *a = RA();
                 a[1] = result;
                 var_settype(a, NOT_METHOD);
+#ifdef C89
+                }
+#endif
             } else if (var_ismodule(b) && var_isstr(c)) {
                 module_attribute(vm, b, c, &result);
                 reg = vm->reg;
+#ifdef C89
+                {
+#endif
                 bvalue *a = RA();
                 a[1] = result;
                 var_settype(a, NOT_METHOD);
+#ifdef C89
+                }
+#endif
             } else {
                 attribute_error(vm, "method", b, c);
             }
             dispatch();
+#ifdef C89
+            }
+#endif
         }
         opcase(SETMBR): {
 #if BE_USE_PERF_COUNTERS
             vm->counter_set++;
+#endif
+#ifdef C89
+            {
 #endif
             bvalue *a = RA(), *b = RKB(), *c = RKC();
             if (var_isinstance(a) && var_isstr(b)) {
@@ -1040,6 +1098,9 @@ newframe: /* a new call frame */
             }
             attribute_error(vm, "writable attribute", a, b);
             dispatch();
+#ifdef C89
+            }
+#endif
         }
         opcase(GETIDX): {
             bvalue *b = RKB(), *c = RKC();
@@ -1192,6 +1253,9 @@ newframe: /* a new call frame */
 #if BE_USE_PERF_COUNTERS
             vm->counter_call++;
 #endif
+#ifdef C89
+            {
+#endif
             bvalue *var = RA();  /* `var` is the register for the call followed by arguments */
             int mode = 0, argc = IGET_RKB(ins);  /* B contains number of arguments pushed on stack */
         recall: /* goto: instantiation class and call constructor */
@@ -1239,9 +1303,15 @@ newframe: /* a new call frame */
             case BE_CTYPE_FUNC: {
                 if (vm->ctypefunc) {
                     push_native(vm, var, argc, mode);
+#ifdef C89
+                    {
+#endif
                     const void* args = var_toobj(var);
                     vm->ctypefunc(vm, args);
                     ret_native(vm);
+#ifdef C89
+                    }
+#endif
                 } else {
                     vm_error(vm, "internal_error", "missing ctype_func handler");
                 }
@@ -1259,6 +1329,9 @@ newframe: /* a new call frame */
             }
             reg = vm->reg;
             dispatch();
+#ifdef C89
+            }
+#endif
         }
         opcase(RET): {
             bcallframe *cf;
@@ -1300,13 +1373,22 @@ static void prep_closure(bvm *vm, int pos, int argc, int mode)
     for (v = vm->reg + argc; v <= end; ++v) {
         var_setnil(v);
     }
+#ifdef C89
+    {
+#endif
     int v_offset = v - vm->stack;   /* offset from stack base, stack may be reallocated */
     if (proto->varg & BE_VA_VARARG) {  /* there are vararg at the last argument, build the list */
         /* code below uses mostly low-level calls for performance */
         be_stack_require(vm, argc + 4);   /* make sure we don't overflow the stack */
+#ifdef C89
+        {
+#endif
         int top_save_offset = vm->top - vm->stack;  /* save original stack, we need fresh slots to create the 'list' instance */
         vm->top = vm->stack + v_offset;  /* move top of stack right after last argument */
         be_newobject(vm, "list");  /* this creates 2 objects on stack: list instance, BE_LIST object */
+#ifdef C89
+        {
+#endif
         blist *list = var_toobj(vm->top-1);  /* get low-level BE_LIST structure */
         v = vm->reg + proto->argc - 1;  /* last argument */
         for (; v < vm->reg + argc; v++) {
@@ -1314,7 +1396,16 @@ static void prep_closure(bvm *vm, int pos, int argc, int mode)
         }
         *(vm->reg + proto->argc - 1) = *(vm->top-2);  /* change the vararg argument to now contain the list instance */
         vm->top = vm->stack + top_save_offset;  /* restore top of stack pointer */
+#ifdef C89
+        }
+#endif
+#ifdef C89
+        }
+#endif
     }
+#ifdef C89
+    }
+#endif
 }
 
 static void do_closure(bvm *vm, int pos, int argc)
@@ -1372,6 +1463,9 @@ void be_dofunc(bvm *vm, bvalue *v, int argc)
 {
     be_assert(vm->reg <= v && v < vm->stacktop);
     be_assert(vm->stack <= vm->reg && vm->reg < vm->stacktop);
+#ifdef C89
+    {
+#endif
     int pos = v - vm->reg;
     be_assert(!var_isstatic(v));
     switch (var_type(v)) {
@@ -1382,6 +1476,9 @@ void be_dofunc(bvm *vm, bvalue *v, int argc)
     case BE_CTYPE_FUNC: do_cfunc(vm, pos, argc); break;
     default: call_error(vm, v);
     }
+#ifdef C89
+    }
+#endif
 }
 
 /* Default empty constructor */

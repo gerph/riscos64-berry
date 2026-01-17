@@ -447,7 +447,11 @@ int be_mkdir(const char *path)
     result = _kernel_osfile(8, path, &osf);
     if (result == _kernel_ERROR)
     {
+#if defined(__riscos) && !defined(__riscos64)
+        errno = ERANGE;
+#else
         errno = EACCES;
+#endif
         return -1;
     }
     return 0;

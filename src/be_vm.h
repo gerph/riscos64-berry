@@ -26,7 +26,7 @@
 typedef enum {
     COMP_NAMED_GBL = 0x00,  /* compile with named globals */
     COMP_STRICT = 0x01,     /* compile with named globals */
-    COMP_GC_DEBUG = 0x02,   /* compile with gc debug */
+    COMP_GC_DEBUG = 0x02    /* compile with gc debug */
 } compoptmask;
 
 typedef struct {

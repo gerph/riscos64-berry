@@ -29,7 +29,11 @@ typedef struct {
 typedef struct {        /* const long string */
     bstring_header;
     int llen;
+#if defined(__riscos) && !defined(__riscos64)
+    char s[1];
+#else
     char s[];
+#endif
 } bclstring;
 
 typedef struct {

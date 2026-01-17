@@ -25,8 +25,12 @@
 #define MAGIC_NUMBER3       0xFE
 #define BYTECODE_VERSION    4
 
+#ifdef C89
+#define USE_64BIT_INT       (BE_INTGER_TYPE == 2)
+#else
 #define USE_64BIT_INT       (BE_INTGER_TYPE == 2 \
     || BE_INTGER_TYPE == 1 && LONG_MAX == 9223372036854775807L)
+#endif
 
 #if !BE_USE_SCRIPT_COMPILER && BE_USE_BYTECODE_SAVER
 #error bytecode generation dependent compiler (require BE_USE_SCRIPT_COMPILER != 0)

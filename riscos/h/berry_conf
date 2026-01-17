@@ -28,7 +28,7 @@
 #ifdef __riscos64
 #define BE_INTGER_TYPE                  2
 #else
-#define BE_INTGER_TYPE                  2
+#define BE_INTGER_TYPE                  1
 #endif
 
 /* Macro: BE_USE_SINGLE_FLOAT
@@ -38,7 +38,11 @@
  * numbers.
  * Default: 0
  **/
+#if defined(__riscos) && !defined(__riscos64)
+#define BE_USE_SINGLE_FLOAT             1
+#else
 #define BE_USE_SINGLE_FLOAT             0
+#endif
 
 /* Macro: BE_BYTES_MAX_SIZE
  * Maximum size in bytes of a `bytes()` object.

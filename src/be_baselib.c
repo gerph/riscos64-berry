@@ -181,6 +181,9 @@ int be_baselib_super(bvm *vm)
                 if (c == target_class) break;         /* found */
                 o = be_instance_super(o);
             }
+#ifdef C89
+            {
+#endif
             bvalue *top = be_incrtop(vm);
             if (o) {
                 var_setinstance(top, o);    /* return the instance with the specified parent class */
@@ -188,6 +191,9 @@ int be_baselib_super(bvm *vm)
                 var_setnil(top);            /* not found, return nil */
             }
             be_return(vm);
+#ifdef C89
+            }
+#endif
         } else {
             be_getsuper(vm, 1);
             be_return(vm);
@@ -327,8 +333,9 @@ static int l_call(bvm *vm)
             int32_t list_size = be_data_size(vm, top + 1);
 
             if (list_size > 0) {
+                int i;
                 be_stack_require(vm, list_size + 3);   /* make sure we don't overflow the stack */
-                for (int i = 0; i < list_size; i++) {
+                for (i = 0; i < list_size; i++) {
                     be_pushnil(vm);
                 }
                 be_moveto(vm, top + 1, top + 1 + list_size);
