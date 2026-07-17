@@ -30,7 +30,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Native build tools for native build
         run: |
@@ -81,7 +81,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download built RISC OS binary
         uses: actions/download-artifact@v8
